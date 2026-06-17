@@ -1,11 +1,13 @@
 package com.phoneai.local.model
 
 /**
- * Curated catalog of on-device models that run well on Snapdragon-class chips
- * with 8 GB+ RAM (tuned descriptions for Snapdragon 8s Gen 4 / 16 GB).
+ * Curated catalog of on-device models for Snapdragon-class Android devices.
  *
- * All quants are sourced from bartowski's GGUF repos on HuggingFace.
- * If a download URL 404s, the repo/file naming may have changed — update here.
+ * Speed labels are for CPU-only ARM NEON inference (6 threads, Snapdragon 8s Gen 4).
+ * Enabling Vulkan GPU offload roughly 2-3× the tok/s.
+ *
+ * All quants from bartowski's HuggingFace repos.
+ * If a URL 404s the repo name may have changed — update [downloadUrl] here.
  */
 object ModelCatalog {
 
@@ -24,15 +26,14 @@ object ModelCatalog {
             ramRequiredMb = 3600,
             totalLayers   = 34,
             nCtx          = 4096,
-            nThreads      = 4,
-            speedLabel    = "~30-40 tok/s",
+            nThreads      = 6,
+            speedLabel    = "~10-14 tok/s (CPU)",
             qualityStars  = 4,
             tags          = listOf("Khuyến nghị", "Đa ngôn ngữ", "Cân bằng"),
             description   =
-                "Lựa chọn cân bằng tốt nhất cho máy của bạn. Google tối ưu riêng cho " +
-                "thiết bị di động, hỗ trợ tiếng Việt khá tốt, suy luận ổn và tốc độ " +
-                "nhanh. Q4_K_M giữ ~99% chất lượng gốc trong khi chỉ tốn ~2.6 GB. " +
-                "Phù hợp cho chat hằng ngày, tóm tắt, dịch thuật, viết nội dung."
+                "Lựa chọn cân bằng tốt nhất. Google tối ưu riêng cho thiết bị di động, " +
+                "hỗ trợ tiếng Việt khá tốt. Q4_K_M giữ ~99% chất lượng gốc trong khi " +
+                "chỉ tốn ~2.6 GB. Phù hợp cho chat hằng ngày, tóm tắt, dịch thuật."
         ),
 
         // ── Gemma 3 4B Q5 — higher quality ─────────────────────────────────────
@@ -48,14 +49,14 @@ object ModelCatalog {
             ramRequiredMb = 4200,
             totalLayers   = 34,
             nCtx          = 4096,
-            nThreads      = 4,
-            speedLabel    = "~25-32 tok/s",
+            nThreads      = 6,
+            speedLabel    = "~8-11 tok/s (CPU)",
             qualityStars  = 5,
             tags          = listOf("Chất lượng cao", "Đa ngôn ngữ"),
             description   =
                 "Cùng model Gemma 3 4B nhưng nén ở mức Q5 — chất lượng câu trả lời " +
                 "nhỉnh hơn Q4 một chút, đổi lại chậm hơn ~20% và tốn thêm RAM. " +
-                "Chọn bản này nếu bạn ưu tiên độ chính xác hơn tốc độ và máy còn dư RAM."
+                "Chọn bản này nếu bạn ưu tiên độ chính xác hơn tốc độ."
         ),
 
         // ── Gemma 3 1B — ultra light / fastest ─────────────────────────────────
@@ -71,15 +72,14 @@ object ModelCatalog {
             ramRequiredMb = 1400,
             totalLayers   = 26,
             nCtx          = 8192,
-            nThreads      = 4,
-            speedLabel    = "~80-100 tok/s",
+            nThreads      = 6,
+            speedLabel    = "~30-45 tok/s (CPU)",
             qualityStars  = 2,
             tags          = listOf("Siêu nhẹ", "Nhanh nhất", "Tiết kiệm pin"),
             description   =
-                "Model siêu nhẹ, gần như tức thời và rất tiết kiệm pin/nhiệt. " +
+                "Model siêu nhẹ, phản hồi nhanh và rất tiết kiệm pin/nhiệt. " +
                 "Phù hợp cho tác vụ đơn giản: trả lời nhanh, gợi ý văn bản, " +
-                "phân loại, chatbot cơ bản. Không mạnh về suy luận phức tạp hay " +
-                "kiến thức sâu — nếu cần thông minh hơn hãy chọn bản 3B/4B."
+                "phân loại, chatbot cơ bản. Không mạnh về suy luận phức tạp."
         ),
 
         // ── Qwen2.5 3B — best Vietnamese in a small size ───────────────────────
@@ -95,15 +95,14 @@ object ModelCatalog {
             ramRequiredMb = 2900,
             totalLayers   = 36,
             nCtx          = 4096,
-            nThreads      = 4,
-            speedLabel    = "~40-50 tok/s",
+            nThreads      = 6,
+            speedLabel    = "~14-20 tok/s (CPU)",
             qualityStars  = 4,
-            tags          = listOf("Tiếng Việt tốt", "Nhanh", "Lập trình"),
+            tags          = listOf("Tiếng Việt tốt", "Lập trình", "Cân bằng"),
             description   =
                 "Alibaba Qwen2.5 nổi tiếng xử lý tiếng Việt và tiếng Trung rất tốt, " +
-                "đồng thời mạnh về code và toán so với kích thước. Bản 3B vừa nhanh " +
-                "vừa thông minh, là lựa chọn thay thế tuyệt vời cho Gemma nếu bạn dùng " +
-                "tiếng Việt nhiều hoặc cần hỗ trợ lập trình."
+                "đồng thời mạnh về code và toán. Bản 3B vừa nhanh vừa thông minh — " +
+                "lựa chọn thay thế tuyệt vời cho Gemma nếu bạn dùng tiếng Việt nhiều."
         ),
 
         // ── Qwen2.5 7B — strongest, heavier ────────────────────────────────────
@@ -119,15 +118,14 @@ object ModelCatalog {
             ramRequiredMb = 6200,
             totalLayers   = 28,
             nCtx          = 4096,
-            nThreads      = 4,
-            speedLabel    = "~15-22 tok/s",
+            nThreads      = 6,
+            speedLabel    = "~5-8 tok/s (CPU)",
             qualityStars  = 5,
             tags          = listOf("Thông minh nhất", "Tiếng Việt tốt", "Nặng"),
             description   =
                 "Model mạnh nhất trong danh sách — chất lượng trả lời, suy luận và " +
-                "kiến thức tiệm cận trợ lý đám mây. Đổi lại tốn ~6 GB RAM và chậm hơn " +
-                "đáng kể, máy sẽ nóng hơn khi dùng lâu. Với 16 GB RAM máy bạn vẫn chạy " +
-                "tốt; chọn bản này khi cần chất lượng cao nhất và chấp nhận tốc độ vừa phải."
+                "kiến thức tiệm cận trợ lý đám mây. Chạy chậm hơn trên CPU, máy sẽ " +
+                "nóng hơn khi dùng lâu. Chọn khi cần chất lượng cao nhất."
         ),
 
         // ── Llama 3.2 3B — fast, solid English ─────────────────────────────────
@@ -143,14 +141,14 @@ object ModelCatalog {
             ramRequiredMb = 2900,
             totalLayers   = 28,
             nCtx          = 4096,
-            nThreads      = 4,
-            speedLabel    = "~40-55 tok/s",
+            nThreads      = 6,
+            speedLabel    = "~14-20 tok/s (CPU)",
             qualityStars  = 3,
             tags          = listOf("Nhanh", "Phổ biến"),
             description   =
-                "Model của Meta, rất nhanh và nhẹ, hệ sinh thái cộng đồng lớn. " +
-                "Mạnh nhất ở tiếng Anh; tiếng Việt ở mức khá. Lựa chọn tốt nếu bạn " +
-                "muốn tốc độ cao mà vẫn thông minh hơn bản 1B."
+                "Model của Meta, nhẹ và có hệ sinh thái cộng đồng lớn. " +
+                "Mạnh nhất ở tiếng Anh; tiếng Việt ở mức khá. Lựa chọn tốt " +
+                "nếu bạn muốn tốc độ cao mà vẫn thông minh hơn bản 1B."
         ),
 
         // ── Phi-3.5 mini — reasoning per parameter ─────────────────────────────
@@ -166,8 +164,8 @@ object ModelCatalog {
             ramRequiredMb = 3300,
             totalLayers   = 32,
             nCtx          = 4096,
-            nThreads      = 4,
-            speedLabel    = "~30-40 tok/s",
+            nThreads      = 6,
+            speedLabel    = "~11-16 tok/s (CPU)",
             qualityStars  = 4,
             tags          = listOf("Suy luận tốt", "Toán & Code"),
             description   =

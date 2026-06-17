@@ -95,15 +95,20 @@ object DeviceInfo {
         }
     }
 
+    // Set to true once Vulkan SDK is installed and GGML_VULKAN=ON in CMakeLists.txt
+    const val VULKAN_ENABLED = false
+
     /**
-     * How many transformer layers to offload to the Vulkan GPU.
-     * Full offload when there's comfortable headroom; otherwise partial.
+     * How many transformer layers to offload to the GPU.
+     * Returns 0 when [VULKAN_ENABLED] is false (CPU-only build).
+     * When Vulkan is enabled, layers are chosen based on free RAM.
      */
     fun suggestGpuLayers(context: Context, config: ModelConfig): Int {
+        if (!VULKAN_ENABLED) return 0
         val avail = availableRamMb(context)
         val need  = config.ramRequiredMb
         return when {
-            avail >= need * 1.4 -> config.totalLayers          // full GPU offload
+            avail >= need * 1.4 -> config.totalLayers
             avail >= need * 1.1 -> (config.totalLayers * 0.75).toInt()
             avail >= need       -> (config.totalLayers * 0.5).toInt()
             else                -> (config.totalLayers * 0.25).toInt()

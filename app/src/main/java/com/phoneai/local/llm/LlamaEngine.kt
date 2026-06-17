@@ -8,21 +8,27 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.withContext
 
 /**
- * JNI bridge to llama.cpp with Vulkan backend.
+ * JNI bridge to llama.cpp (CPU / ARM NEON backend).
  * All heavy work runs on IO dispatcher; tokens stream via Flow.
+ *
+ * GPU offload is currently disabled — building Vulkan shaders requires
+ * glslc (Vulkan SDK) on the Windows host. To enable it:
+ *   1. Install Vulkan SDK and add glslc to PATH
+ *   2. Set GGML_VULKAN=ON in CMakeLists.txt
+ *   3. Change DEFAULT_N_GPU_LAYERS to 28 (or use DeviceInfo.suggestGpuLayers)
  */
 class LlamaEngine {
 
     companion object {
         private const val TAG = "LlamaEngine"
 
-        // Tuned for Snapdragon 8s Gen 4:
-        // - 28 GPU layers  → Adreno 740 handles most of the matmuls
-        // - 4 CPU threads  → leave cores for UI / background
-        // - 4096 ctx        → ~4k token window, fits in ~600 MB
+        // CPU-only preset for Snapdragon 8s Gen 4:
+        // - 0 GPU layers   → all computation on ARM NEON CPU
+        // - 6 CPU threads  → 6 of the 8 cores for inference, 2 for UI
+        // - 4096 ctx       → ~600 MB KV cache
         const val DEFAULT_N_CTX        = 4096
-        const val DEFAULT_N_THREADS    = 4
-        const val DEFAULT_N_GPU_LAYERS = 28
+        const val DEFAULT_N_THREADS    = 6
+        const val DEFAULT_N_GPU_LAYERS = 0
 
         init {
             System.loadLibrary("phoneai")

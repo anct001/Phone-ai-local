@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.phoneai.local"
-        minSdk = 29          // Android 10+ required for Vulkan 1.1
+        minSdk = 29
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
@@ -23,12 +23,16 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags += "-std=c++17 -O3 -DGGML_USE_VULKAN=1"
+                // -O3 + ARM NEON (mandatory on arm64-v8a, no extra flags needed)
+                // Vulkan disabled: requires glslc on the host — install Vulkan SDK
+                // and flip GGML_VULKAN to ON in CMakeLists.txt to enable GPU offload.
+                cppFlags += "-std=c++17 -O3"
                 arguments += listOf(
-                    "-DGGML_VULKAN=ON",
-                    "-DGGML_OPENMP=OFF",
+                    "-DGGML_VULKAN=OFF",
+                    "-DGGML_NATIVE=OFF",
                     "-DLLAMA_BUILD_TESTS=OFF",
-                    "-DLLAMA_BUILD_EXAMPLES=OFF"
+                    "-DLLAMA_BUILD_EXAMPLES=OFF",
+                    "-DLLAMA_BUILD_SERVER=OFF"
                 )
             }
         }
