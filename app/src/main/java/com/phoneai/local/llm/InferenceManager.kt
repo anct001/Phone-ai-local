@@ -4,13 +4,15 @@ import android.content.Context
 import android.util.Log
 import com.phoneai.local.model.ChatMessage
 import com.phoneai.local.model.ModelConfig
-import com.phoneai.local.model.toGemma3Prompt
+import com.phoneai.local.model.PromptTemplates
+import com.phoneai.local.utils.DeviceInfo
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 class InferenceManager(private val context: Context) {
 
     private val engine = LlamaEngine()
+    private var currentConfig: ModelConfig? = null
 
     companion object {
         private const val TAG = "InferenceManager"
@@ -20,6 +22,7 @@ Nếu không biết, hãy thành thật nói không biết thay vì bịa đặt
     }
 
     val isModelLoaded: Boolean get() = engine.isLoaded
+    val loadedConfig: ModelConfig? get() = currentConfig
 
     fun modelFilePath(config: ModelConfig): File =
         File(context.filesDir, config.fileName)
@@ -32,13 +35,18 @@ Nếu không biết, hãy thành thật nói không biết thay vì bịa đặt
         if (!file.exists()) {
             return Result.failure(IllegalStateException("Model file not found: ${file.path}"))
         }
-        Log.i(TAG, "Loading ${config.displayName} (${config.sizeGb} GB)")
+        // Decide GPU offload from live free RAM rather than a hard-coded value.
+        val gpuLayers = DeviceInfo.suggestGpuLayers(context, config)
+        Log.i(TAG, "Loading ${config.displayName} ${config.quant} " +
+                "(${config.sizeGb} GB, gpuLayers=$gpuLayers)")
+
         val ok = engine.loadModel(
             modelPath  = file.absolutePath,
             nCtx       = config.nCtx,
             nThreads   = config.nThreads,
-            nGpuLayers = config.nGpuLayers
+            nGpuLayers = gpuLayers
         )
+        currentConfig = if (ok) config else null
         return if (ok) Result.success(Unit)
         else Result.failure(RuntimeException("llama.cpp failed to load model"))
     }
@@ -49,12 +57,16 @@ Nếu không biết, hãy thành thật nói không biết thay vì bịa đặt
         temperature: Float = 0.7f,
         topP: Float = 0.9f
     ): Flow<String> {
-        val prompt = history.toGemma3Prompt(SYSTEM_PROMPT)
-        Log.d(TAG, "Prompt length: ${prompt.length} chars")
+        val family = currentConfig?.family ?: "Gemma 3"
+        val prompt = PromptTemplates.build(family, history, SYSTEM_PROMPT)
+        Log.d(TAG, "Prompt length: ${prompt.length} chars (template=$family)")
         return engine.generate(prompt, maxNewTokens, temperature, topP)
     }
 
     fun stopGeneration() = engine.stop()
 
-    fun unloadModel() = engine.free()
+    fun unloadModel() {
+        engine.free()
+        currentConfig = null
+    }
 }

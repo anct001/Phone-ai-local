@@ -1,14 +1,17 @@
 package com.phoneai.local.ui
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.phoneai.local.databinding.ActivityChatBinding
-import com.phoneai.local.model.ModelConfig
+import com.phoneai.local.model.ModelCatalog
 import kotlinx.coroutines.launch
 
 class ChatActivity : AppCompatActivity() {
@@ -16,6 +19,25 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatBinding
     private val viewModel: ChatViewModel by viewModels()
     private lateinit var adapter: MessageAdapter
+
+    private val prefs by lazy { getSharedPreferences("phoneai", MODE_PRIVATE) }
+
+    private val modelPicker = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val id = result.data?.getStringExtra(ModelSelectionActivity.RESULT_MODEL_ID)
+            val config = id?.let { ModelCatalog.byId(it) }
+            if (config != null) {
+                prefs.edit().putString(KEY_LAST_MODEL, config.id).apply()
+                viewModel.loadModel(config)
+            }
+        }
+    }
+
+    companion object {
+        private const val KEY_LAST_MODEL = "last_model"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +48,13 @@ class ChatActivity : AppCompatActivity() {
         setupInputBar()
         observeState()
 
-        // Auto-load default model on start if file exists
-        val defaultConfig = ModelConfig.DEFAULT
-        if (viewModel.inference.isModelDownloaded(defaultConfig)) {
-            viewModel.loadModel(defaultConfig)
+        // Restore last-used model if still present; otherwise open the picker.
+        val lastId = prefs.getString(KEY_LAST_MODEL, null)
+        val config = lastId?.let { ModelCatalog.byId(it) }
+        if (config != null && viewModel.inference.isModelDownloaded(config)) {
+            viewModel.loadModel(config)
         } else {
-            showModelNotFound(defaultConfig)
+            openModelPicker()
         }
     }
 
@@ -53,14 +76,14 @@ class ChatActivity : AppCompatActivity() {
                 binding.etInput.text?.clear()
             }
         }
+        binding.btnStop.setOnClickListener { viewModel.stopGeneration() }
+        binding.btnClear.setOnClickListener { viewModel.clearChat() }
+        binding.btnSwitchModel.setOnClickListener { openModelPicker() }
+        binding.btnOpenPicker.setOnClickListener { openModelPicker() }
+    }
 
-        binding.btnStop.setOnClickListener {
-            viewModel.stopGeneration()
-        }
-
-        binding.btnClear.setOnClickListener {
-            viewModel.clearChat()
-        }
+    private fun openModelPicker() {
+        modelPicker.launch(Intent(this, ModelSelectionActivity::class.java))
     }
 
     private fun observeState() {
@@ -72,36 +95,38 @@ class ChatActivity : AppCompatActivity() {
                     }
                 }
 
-                // Input bar visibility
                 val modelReady = state.modelState is ModelState.Loaded
+
+                // Show chat UI only when a model is loaded
                 binding.inputLayout.visibility = if (modelReady) View.VISIBLE else View.GONE
-                binding.tvModelStatus.visibility = if (modelReady) View.GONE else View.VISIBLE
+                binding.rvMessages.visibility  = if (modelReady) View.VISIBLE else View.GONE
+                binding.emptyState.visibility  = if (modelReady) View.GONE else View.VISIBLE
+
+                // Toolbar title reflects loaded model
+                binding.toolbar.title = when (val ms = state.modelState) {
+                    is ModelState.Loaded -> "${ms.config.displayName} · ${ms.config.quant}"
+                    else -> "Phone AI"
+                }
 
                 // Send / Stop toggle
                 binding.btnSend.visibility = if (state.isGenerating) View.GONE else View.VISIBLE
                 binding.btnStop.visibility = if (state.isGenerating) View.VISIBLE else View.GONE
 
-                // Status text
+                // Empty-state status text
                 binding.tvModelStatus.text = when (val ms = state.modelState) {
-                    is ModelState.NotLoaded -> "Model chưa được tải"
-                    is ModelState.Loading   -> "Đang tải model…"
+                    is ModelState.NotLoaded -> "Chưa có model nào được tải.\nHãy chọn và tải một model để bắt đầu."
+                    is ModelState.Loading   -> "Đang tải model vào bộ nhớ…"
                     is ModelState.Loaded    -> ms.config.displayName
-                    is ModelState.Error     -> "Lỗi: ${ms.msg}"
+                    is ModelState.Error     -> "Lỗi tải model: ${ms.msg}"
                 }
+                binding.btnOpenPicker.visibility =
+                    if (state.modelState is ModelState.Loading) View.GONE else View.VISIBLE
 
-                // Error toast
                 state.errorMessage?.let { err ->
                     Toast.makeText(this@ChatActivity, err, Toast.LENGTH_LONG).show()
                     viewModel.dismissError()
                 }
             }
         }
-    }
-
-    private fun showModelNotFound(config: ModelConfig) {
-        val path = viewModel.inference.modelFilePath(config)
-        binding.tvModelStatus.text =
-            "Chưa có model.\nSao chép file GGUF vào:\n${path.absolutePath}"
-        binding.tvModelStatus.visibility = View.VISIBLE
     }
 }

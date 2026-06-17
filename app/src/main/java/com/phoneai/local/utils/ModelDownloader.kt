@@ -4,25 +4,27 @@ import android.content.Context
 import android.util.Log
 import com.phoneai.local.model.ModelConfig
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.isActive
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 /**
- * Downloads GGUF model from HuggingFace with progress reporting.
- * Usage: pair with WorkManager for background resilient downloads.
+ * Downloads a GGUF model from its HuggingFace URL with resumable progress.
+ *
+ * Downloads to "<name>.part" and atomically renames on success, so a partially
+ * downloaded file is never mistaken for a complete model. Cancel the collecting
+ * coroutine to pause — the .part file is kept and resumed next time.
  */
 object ModelDownloader {
 
     private const val TAG = "ModelDownloader"
-
-    // HuggingFace bartowski repo — all Gemma 3 4B quants
-    private const val HF_BASE =
-        "https://huggingface.co/bartowski/gemma-3-4b-it-GGUF/resolve/main"
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -39,48 +41,76 @@ object ModelDownloader {
             if (totalBytes > 0) ((bytesDownloaded * 100) / totalBytes).toInt() else 0
     }
 
+    fun destFile(context: Context, config: ModelConfig): File =
+        File(context.filesDir, config.fileName)
+
     fun download(context: Context, config: ModelConfig): Flow<Progress> = flow {
-        val destFile = File(context.filesDir, config.fileName)
+        val destFile = destFile(context, config)
         val tempFile = File(context.filesDir, "${config.fileName}.part")
 
-        val resumeOffset = if (tempFile.exists()) tempFile.length() else 0L
-        val url = "$HF_BASE/${config.fileName}"
-
-        Log.i(TAG, "Downloading $url (resume from $resumeOffset bytes)")
-
-        val requestBuilder = Request.Builder().url(url)
-        if (resumeOffset > 0) requestBuilder.header("Range", "bytes=$resumeOffset-")
-
-        val response = client.newCall(requestBuilder.build()).execute()
-        if (!response.isSuccessful && response.code != 206) {
-            emit(Progress(0, 0, error = "HTTP ${response.code}"))
+        if (destFile.exists()) {
+            emit(Progress(destFile.length(), destFile.length(), isDone = true))
             return@flow
         }
 
-        val contentLength = response.body?.contentLength() ?: -1L
-        val totalBytes    = if (resumeOffset > 0) resumeOffset + contentLength else contentLength
+        val resumeOffset = if (tempFile.exists()) tempFile.length() else 0L
+        Log.i(TAG, "Downloading ${config.downloadUrl} (resume from $resumeOffset bytes)")
 
-        response.body?.byteStream()?.use { stream ->
-            tempFile.outputStream().use { out ->
-                if (resumeOffset > 0) {
-                    // Append mode for resumed downloads
-                    tempFile.outputStream().channel.also { it.position(resumeOffset) }
-                }
-                val buffer = ByteArray(8 * 1024)
-                var downloaded = resumeOffset
-                var read: Int
+        val requestBuilder = Request.Builder().url(config.downloadUrl)
+        if (resumeOffset > 0) requestBuilder.header("Range", "bytes=$resumeOffset-")
 
-                while (stream.read(buffer).also { read = it } != -1) {
-                    out.write(buffer, 0, read)
-                    downloaded += read
-                    emit(Progress(downloaded, totalBytes))
+        val response = client.newCall(requestBuilder.build()).execute()
+        try {
+            // 200 = full body, 206 = partial (resume accepted)
+            if (!response.isSuccessful) {
+                emit(Progress(0, 0, error = "HTTP ${response.code}"))
+                return@flow
+            }
+            val serverResumed = response.code == 206
+            val startOffset = if (serverResumed) resumeOffset else 0L
+
+            val body = response.body ?: run {
+                emit(Progress(0, 0, error = "Empty response body"))
+                return@flow
+            }
+            val contentLength = body.contentLength()
+            val totalBytes = if (contentLength > 0) startOffset + contentLength else config.sizeMb * 1024L * 1024L
+
+            // append=serverResumed: continue the .part file; otherwise overwrite
+            FileOutputStream(tempFile, serverResumed).use { out ->
+                body.byteStream().use { stream ->
+                    val buffer = ByteArray(64 * 1024)
+                    var downloaded = startOffset
+                    var read: Int
+                    var lastEmit = 0L
+
+                    while (stream.read(buffer).also { read = it } != -1) {
+                        if (!currentCoroutineContext().isActive) {
+                            Log.i(TAG, "Download paused at $downloaded bytes")
+                            return@flow   // keep .part for resume
+                        }
+                        out.write(buffer, 0, read)
+                        downloaded += read
+                        // throttle emissions to ~every 512 KB to avoid flooding UI
+                        if (downloaded - lastEmit >= 512 * 1024) {
+                            emit(Progress(downloaded, totalBytes))
+                            lastEmit = downloaded
+                        }
+                    }
                 }
             }
+
+            if (tempFile.renameTo(destFile)) {
+                emit(Progress(destFile.length(), destFile.length(), isDone = true))
+                Log.i(TAG, "Download complete: ${destFile.absolutePath}")
+            } else {
+                emit(Progress(0, 0, error = "Không thể lưu file model"))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Download failed", e)
+            emit(Progress(0, 0, error = e.message ?: "Lỗi tải xuống"))
+        } finally {
+            response.close()
         }
-
-        tempFile.renameTo(destFile)
-        emit(Progress(totalBytes, totalBytes, isDone = true))
-        Log.i(TAG, "Download complete: ${destFile.absolutePath}")
-
     }.flowOn(Dispatchers.IO)
 }

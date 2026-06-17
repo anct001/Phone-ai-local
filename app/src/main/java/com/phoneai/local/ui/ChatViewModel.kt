@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.phoneai.local.llm.InferenceManager
 import com.phoneai.local.model.ChatMessage
+import com.phoneai.local.model.ModelCatalog
 import com.phoneai.local.model.ModelConfig
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +39,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
     // ── Model loading ─────────────────────────────────────────────────────────
 
-    fun loadModel(config: ModelConfig = ModelConfig.DEFAULT) {
+    fun loadModel(config: ModelConfig = ModelCatalog.default) {
         viewModelScope.launch {
             _uiState.update { it.copy(modelState = ModelState.Loading) }
             inference.loadModel(config)

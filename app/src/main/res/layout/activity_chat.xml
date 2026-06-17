@@ -6,20 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/bg_primary">
 
-    <!-- Model status banner (shown when model not loaded) -->
-    <TextView
-        android:id="@+id/tvModelStatus"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:gravity="center"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -34,16 +20,57 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageButton
+        android:id="@+id/btnSwitchModel"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@android:drawable/ic_menu_manage"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Chọn model"
+        app:layout_constraintTop_toTopOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar"
+        app:layout_constraintEnd_toStartOf="@id/btnClear" />
+
+    <ImageButton
         android:id="@+id/btnClear"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@android:drawable/ic_menu_delete"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Clear chat"
+        android:contentDescription="Xoá hội thoại"
         app:layout_constraintTop_toTopOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="@id/toolbar"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp" />
+
+    <!-- Empty / no-model state -->
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/inputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvModelStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnOpenPicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Chọn / Tải model" />
+    </LinearLayout>
 
     <!-- Messages list -->
     <androidx.recyclerview.widget.RecyclerView
@@ -66,6 +93,7 @@
         android:padding="8dp"
         android:background="@color/bg_surface"
         android:elevation="4dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -75,7 +103,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Nhập tin nhắn…"
+            android:hint="@string/hint_message"
             android:inputType="textMultiLine|textCapSentences"
             android:maxLines="4"
             android:imeOptions="actionSend"
@@ -92,7 +120,7 @@
             android:layout_marginStart="8dp"
             android:src="@android:drawable/ic_menu_send"
             android:background="@drawable/bg_send_button"
-            android:contentDescription="Send"
+            android:contentDescription="@string/btn_send"
             android:tint="@android:color/white" />
 
         <ImageButton
@@ -102,7 +130,7 @@
             android:layout_marginStart="8dp"
             android:src="@android:drawable/ic_media_pause"
             android:background="@drawable/bg_stop_button"
-            android:contentDescription="Stop"
+            android:contentDescription="@string/btn_stop"
             android:tint="@android:color/white"
             android:visibility="gone" />
 
