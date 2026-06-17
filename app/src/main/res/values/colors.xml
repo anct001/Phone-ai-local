@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_primary">#0F1117</color>
+    <color name="bg_surface">#1A1D27</color>
+    <color name="bg_bubble_user">#2563EB</color>
+    <color name="bg_bubble_assistant">#1E2235</color>
+    <color name="text_primary">#E8EAF0</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="accent">#3B82F6</color>
+    <color name="accent_stop">#EF4444</color>
+</resources>

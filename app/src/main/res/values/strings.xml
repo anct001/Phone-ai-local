@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Phone AI</string>
+    <string name="hint_message">Nhập tin nhắn…</string>
+    <string name="btn_send">Gửi</string>
+    <string name="btn_stop">Dừng</string>
+    <string name="loading_model">Đang tải model…</string>
+    <string name="model_not_found">Chưa có model. Hãy tải GGUF vào thư mục Files.</string>
+</resources>
