@@ -77,12 +77,14 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.ktx)   // required for by viewModels() delegate
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.coroutines.android)
+    implementation(libs.okhttp)                  // model downloader
     implementation(libs.gson)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
