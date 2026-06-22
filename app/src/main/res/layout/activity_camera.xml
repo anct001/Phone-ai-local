@@ -29,7 +29,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="帳票全体が枠内に収まるよう撮影してください"
+        android:text="Hãy chụp sao cho toàn bộ biểu mẫu nằm trong khung"
         android:textColor="#FFF"
         android:textSize="13sp"
         android:background="#88000000"
@@ -54,7 +54,7 @@
             android:id="@+id/btn_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="戻る"
+            android:text="Quay lại"
             android:textColor="#FFF"
             android:layout_marginEnd="40dp"
             style="@style/Widget.MaterialComponents.Button.TextButton" />
@@ -64,14 +64,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_camera_shutter"
-            android:contentDescription="撮影"
+            android:contentDescription="Chụp ảnh"
             app:fabSize="normal" />
 
         <TextView
             android:id="@+id/tv_hint"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:text="シャッターを押して撮影"
+            android:text="Nhấn nút chụp ảnh"
             android:textColor="#AAA"
             android:textSize="11sp"
             android:gravity="center"

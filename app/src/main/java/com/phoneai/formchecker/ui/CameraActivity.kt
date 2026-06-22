@@ -59,7 +59,7 @@ class CameraActivity : AppCompatActivity() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Camera bind failed", e)
-                Toast.makeText(this, "カメラの起動に失敗しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Không thể khởi động camera", Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -74,7 +74,7 @@ class CameraActivity : AppCompatActivity() {
         val outputOptions = ImageCapture.OutputFileOptions.Builder(outputFile).build()
 
         binding.btnShutter.isEnabled = false
-        binding.tvHint.text = "保存中..."
+        binding.tvHint.text = "Đang lưu..."
 
         imageCapture.takePicture(
             outputOptions,
@@ -91,10 +91,10 @@ class CameraActivity : AppCompatActivity() {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed", exc)
                     Toast.makeText(
-                        this@CameraActivity, "撮影に失敗しました: ${exc.message}", Toast.LENGTH_SHORT
+                        this@CameraActivity, "Chụp ảnh thất bại: ${exc.message}", Toast.LENGTH_SHORT
                     ).show()
                     binding.btnShutter.isEnabled = true
-                    binding.tvHint.text = "シャッターを押して撮影"
+                    binding.tvHint.text = "Nhấn nút chụp ảnh"
                 }
             }
         )

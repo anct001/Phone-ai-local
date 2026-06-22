@@ -42,7 +42,7 @@ class ModelDownloadActivity : AppCompatActivity() {
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
-            title = "AIモデルをダウンロード"
+            title = "Tải model AI"
         }
 
         refreshStorageInfo()
@@ -71,7 +71,7 @@ class ModelDownloadActivity : AppCompatActivity() {
         val availableMb = availableStorageMb()
         val color = if (availableMb < 1500) getColor(android.R.color.holo_red_dark)
                     else getColor(android.R.color.darker_gray)
-        binding.tvStorageInfo.text = "利用可能ストレージ: ${availableMb} MB（推奨: 2000 MB 以上）"
+        binding.tvStorageInfo.text = "Bộ nhớ khả dụng: ${availableMb} MB (khuyến nghị: trên 2000 MB)"
         binding.tvStorageInfo.setTextColor(color)
     }
 
@@ -93,17 +93,17 @@ class ModelDownloadActivity : AppCompatActivity() {
     private fun startDownload() {
         val url = binding.etDownloadUrl.text?.toString()?.trim().orEmpty()
         if (url.isEmpty()) {
-            Toast.makeText(this, "URLを入力してください", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Vui lòng nhập URL", Toast.LENGTH_SHORT).show()
             return
         }
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            Toast.makeText(this, "有効なURL (https://...) を入力してください", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Vui lòng nhập URL hợp lệ (https://...)", Toast.LENGTH_SHORT).show()
             return
         }
 
         setUiDownloading(true)
         binding.progressDownload.isIndeterminate = true
-        binding.tvDownloadStatus.text = "接続中..."
+        binding.tvDownloadStatus.text = "Đang kết nối..."
 
         downloadJob = lifecycleScope.launch {
             val tmp = File(ModelManager.modelDir(this@ModelDownloadActivity), "${ModelManager.MODEL_FILE_NAME}.tmp")
@@ -119,24 +119,24 @@ class ModelDownloadActivity : AppCompatActivity() {
 
                 binding.progressDownload.isIndeterminate = false
                 binding.progressDownload.progress = 100
-                binding.tvDownloadStatus.text = "✅ ダウンロード完了！モデルが使用可能になりました。"
+                binding.tvDownloadStatus.text = "✅ Tải xuống hoàn tất! Model đã sẵn sàng sử dụng."
                 setUiDownloading(false)
-                Toast.makeText(this@ModelDownloadActivity, "ダウンロード完了", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ModelDownloadActivity, "Tải xuống xong", Toast.LENGTH_SHORT).show()
             } catch (e: CancellationException) {
                 tmp.delete()
                 binding.progressDownload.isIndeterminate = false
-                binding.tvDownloadStatus.text = "⛔ キャンセルしました"
+                binding.tvDownloadStatus.text = "⛔ Đã hủy"
                 setUiDownloading(false)
                 throw e
             } catch (e: Exception) {
                 tmp.delete()
-                val msg = if (activeCall?.isCanceled() == true) "⛔ キャンセルしました"
-                          else "❌ エラー: ${e.message}"
+                val msg = if (activeCall?.isCanceled() == true) "⛔ Đã hủy"
+                          else "❌ Lỗi: ${e.message}"
                 binding.progressDownload.isIndeterminate = false
                 binding.tvDownloadStatus.text = msg
                 setUiDownloading(false)
                 if (activeCall?.isCanceled() != true) {
-                    Toast.makeText(this@ModelDownloadActivity, "ダウンロード失敗: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@ModelDownloadActivity, "Tải xuống thất bại: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -150,7 +150,7 @@ class ModelDownloadActivity : AppCompatActivity() {
         val response = call.execute()
         if (!response.isSuccessful) throw Exception("HTTP ${response.code}: ${response.message}")
 
-        val body = response.body ?: throw Exception("レスポンスボディが空です")
+        val body = response.body ?: throw Exception("Nội dung phản hồi rỗng")
         val totalBytes = body.contentLength()
         val startMs = System.currentTimeMillis()
         var downloaded = 0L
@@ -172,10 +172,10 @@ class ModelDownloadActivity : AppCompatActivity() {
                     val pct = if (totalBytes > 0) (downloaded * 100 / totalBytes).toInt() else -1
 
                     val statusText = buildString {
-                        append("ダウンロード中... ${dlMb} MB")
+                        append("Đang tải... ${dlMb} MB")
                         if (totalMb > 0) append(" / ${totalMb} MB")
                         if (pct >= 0) append(" (${pct}%)")
-                        append("\n速度: ${"%.1f".format(speedMbps)} MB/s")
+                        append("\nTốc độ: ${"%.1f".format(speedMbps)} MB/s")
                     }
 
                     runOnUiThread {

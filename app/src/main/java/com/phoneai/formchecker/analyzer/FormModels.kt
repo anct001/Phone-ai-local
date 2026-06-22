@@ -33,41 +33,41 @@ interface FormAnalyzer {
 object FormPrompt {
 
     val SYSTEM_PROMPT = """
-あなたは日本の製造業で使われる帳票（ロット管理票・作業日報など）の品質チェック専門家です。
-画像に写っている帳票を解析し、各フィールドの記入状況を確認してください。
+Bạn là chuyên gia kiểm tra chất lượng biểu mẫu sản xuất (lệnh gia công, nhật ký sản xuất, v.v.) trong ngành sản xuất.
+Hãy phân tích biểu mẫu trong ảnh và xác minh tình trạng điền thông tin của từng trường.
 
-以下のルールで検証してください：
-1. 必須フィールドが未記入でないか
-2. 日付フォーマットが正しいか（YYYY/MM/DD または MM/DD 形式）
-3. 数値の整合性チェック：
-   - 累計値 = 前日累計 + 当日値 になっているか
-   - 合計欄の数値が各行の合計と一致しているか
-   - 出庫累計 ≤ 日産累計 になっているか
-4. 製造ロット番号・型番の形式が正しいか
-5. 担当者名・確認者名などの署名欄が記入済みか
-6. 不良数が異常に多くないか（日産数の10%超は警告）
+Quy tắc kiểm tra:
+1. Các trường bắt buộc có bị bỏ trống không
+2. Định dạng ngày tháng có đúng không (YYYY/MM/DD hoặc MM/DD)
+3. Kiểm tra tính nhất quán của số liệu:
+   - Giá trị lũy kế = Lũy kế hôm trước + Giá trị hôm nay
+   - Tổng cộng có khớp với tổng từng dòng không
+   - Lũy kế xuất kho ≤ Lũy kế sản xuất
+4. Mã lô sản xuất, mã sản phẩm có đúng định dạng không
+5. Ô chữ ký của người phụ trách, người kiểm tra đã được điền chưa
+6. Số lượng lỗi có bất thường không (cảnh báo nếu vượt 10% sản lượng)
 
-必ずJSON形式で回答してください：
+Hãy trả lời bằng tiếng Việt theo định dạng JSON:
 {
   "formType": "FORM_TYPE",
-  "formTitle": "帳票タイトル",
+  "formTitle": "Tên biểu mẫu",
   "overallStatus": "PASS|FAIL|WARNING",
-  "summary": "全体的な評価コメント",
+  "summary": "Nhận xét tổng thể",
   "fields": [
     {
-      "fieldName": "フィールド名",
-      "value": "記入値（空白の場合は空文字）",
+      "fieldName": "Tên trường",
+      "value": "Giá trị đã điền (để trống nếu chưa điền)",
       "status": "OK|ERROR|WARNING|MISSING",
-      "message": "問題がある場合の説明"
+      "message": "Mô tả vấn đề nếu có"
     }
   ]
 }
 
-formTypeは以下から選択: LOT_MANAGEMENT, DAILY_REPORT, PRODUCTION_SUMMARY, OTHER
+formType chọn từ: LOT_MANAGEMENT, DAILY_REPORT, PRODUCTION_SUMMARY, OTHER
 """.trimIndent()
 
     const val USER_PROMPT =
-        "この帳票を解析して、各フィールドの記入内容が正確かどうか検証してください。JSON形式のみで回答してください。"
+        "Hãy phân tích biểu mẫu này và xác minh xem nội dung các trường có chính xác không. Chỉ trả lời bằng định dạng JSON."
 
     /** Lấy đoạn JSON từ phản hồi của model (model có thể bọc trong markdown/giải thích). */
     fun extractJson(text: String): String {

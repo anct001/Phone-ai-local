@@ -58,10 +58,10 @@ class ResultActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.VISIBLE
         binding.layoutResults.visibility = View.GONE
         val engineLabel = when (ModelManager.getEngine(this)) {
-            AnalyzerEngine.LOCAL_GEMMA -> "オンデバイスAI (Gemma)"
-            AnalyzerEngine.CLAUDE_CLOUD -> "クラウドAI (Claude)"
+            AnalyzerEngine.LOCAL_GEMMA -> "AI trên thiết bị (Gemma)"
+            AnalyzerEngine.CLAUDE_CLOUD -> "AI đám mây (Claude)"
         }
-        binding.tvStatus.text = "$engineLabel が帳票を解析中..."
+        binding.tvStatus.text = "$engineLabel đang phân tích..."
         binding.btnRetry.isEnabled = false
 
         lifecycleScope.launch {
@@ -77,10 +77,10 @@ class ResultActivity : AppCompatActivity() {
                 displayResults(result)
             } catch (e: Exception) {
                 binding.progressBar.visibility = View.GONE
-                binding.tvStatus.text = "エラーが発生しました"
+                binding.tvStatus.text = "Đã xảy ra lỗi"
                 binding.tvStatus.setTextColor(Color.RED)
                 binding.btnRetry.isEnabled = true
-                Toast.makeText(this@ResultActivity, "解析エラー: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@ResultActivity, "Lỗi phân tích: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -94,9 +94,9 @@ class ResultActivity : AppCompatActivity() {
         binding.tvSummary.text = result.summary
 
         val (statusColor, statusText) = when (result.overallStatus) {
-            "PASS" -> Color.parseColor("#2E7D32") to "✓ 合格"
-            "FAIL" -> Color.parseColor("#C62828") to "✗ 不合格"
-            else   -> Color.parseColor("#E65100") to "⚠ 要確認"
+            "PASS" -> Color.parseColor("#2E7D32") to "✓ Đạt"
+            "FAIL" -> Color.parseColor("#C62828") to "✗ Không đạt"
+            else   -> Color.parseColor("#E65100") to "⚠ Cần kiểm tra"
         }
         binding.tvStatus.text = statusText
         binding.tvStatus.setTextColor(statusColor)
@@ -111,7 +111,7 @@ class ResultActivity : AppCompatActivity() {
         val errCount = result.fields.count { it.status == "ERROR" }
         val warnCount = result.fields.count { it.status == "WARNING" }
         val missingCount = result.fields.count { it.status == "MISSING" }
-        binding.tvFieldSummary.text = "合計 ${result.fields.size} 項目：OK $okCount / エラー $errCount / 警告 $warnCount / 未記入 $missingCount"
+        binding.tvFieldSummary.text = "Tổng ${result.fields.size} mục: OK $okCount / Lỗi $errCount / Cảnh báo $warnCount / Chưa điền $missingCount"
     }
 
     private fun addFieldRow(field: FieldResult) {
@@ -120,7 +120,7 @@ class ResultActivity : AppCompatActivity() {
         )
 
         itemBinding.tvFieldName.text = field.fieldName
-        itemBinding.tvFieldValue.text = field.value.ifBlank { "（未記入）" }
+        itemBinding.tvFieldValue.text = field.value.ifBlank { "(chưa điền)" }
         itemBinding.tvFieldMessage.text = field.message
 
         val (bgColor, icon) = when (field.status) {
@@ -149,7 +149,7 @@ class ResultActivity : AppCompatActivity() {
 
     private fun clearResults() {
         binding.layoutResults.visibility = View.GONE
-        binding.tvStatus.text = "AIが帳票を解析中..."
+        binding.tvStatus.text = "AI đang phân tích biểu mẫu..."
         binding.tvStatus.setTextColor(Color.BLACK)
         binding.llFieldResults.removeAllViews()
     }

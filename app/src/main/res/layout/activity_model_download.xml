@@ -29,7 +29,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🧠 Gemma 3n モデルをダウンロード"
+                    android:text="🧠 Tải xuống model Gemma 3n"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
@@ -41,7 +41,7 @@
                     android:textSize="13sp"
                     android:lineSpacingExtra="3dp"
                     android:textColor="@color/text_secondary"
-                    android:text="モデルファイルのURLを取得する手順:\n\n1. Hugging Face でGemma 3nのモデルページを開く\n   (huggingface.co/google)\n2. アカウント登録・ログインしてライセンスに同意\n3. MediaPipe (.task) 形式ファイルのダウンロードURLをコピー\n4. 下の欄に貼り付けて「ダウンロード開始」をタップ\n\n推奨モデル: gemma-3n-E4B-it-int4.task (~1.5 GB)" />
+                    android:text="Cách lấy link tải model:\n\n1. Vào trang Gemma 3n trên Hugging Face\n   (huggingface.co/google)\n2. Đăng nhập và chấp nhận điều khoản license\n3. Copy link tải file định dạng MediaPipe (.task)\n4. Dán URL vào ô bên dưới rồi nhấn \"Bắt đầu tải xuống\"\n\nModel khuyến nghị: gemma-3n-E4B-it-int4.task (~1,5 GB)" />
 
             </LinearLayout>
 
@@ -52,7 +52,7 @@
             android:id="@+id/tv_storage_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="利用可能ストレージ: 計算中..."
+            android:text="Bộ nhớ khả dụng: đang tính..."
             android:textSize="12sp"
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="6dp" />
@@ -62,7 +62,7 @@
             android:id="@+id/tv_wifi_warning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚠ Wi-Fi未接続。モバイルデータでのダウンロードは大量通信量を消費します。"
+            android:text="⚠ Chưa kết nối Wi-Fi. Tải qua mạng di động sẽ tốn nhiều dữ liệu."
             android:textSize="12sp"
             android:textColor="@color/status_warning"
             android:visibility="gone"
@@ -73,7 +73,7 @@
             android:id="@+id/til_url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="ダウンロードURL (https://...)"
+            android:hint="URL tải xuống (https://...)"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -113,7 +113,7 @@
             android:id="@+id/btn_download"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:text="⬇  ダウンロード開始"
+            android:text="⬇  Bắt đầu tải xuống"
             android:textSize="15sp"
             android:layout_marginBottom="12dp"
             style="@style/Widget.MaterialComponents.Button" />
@@ -123,7 +123,7 @@
             android:id="@+id/btn_cancel_download"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:text="キャンセル"
+            android:text="Hủy"
             android:textSize="15sp"
             android:visibility="gone"
             android:layout_marginBottom="12dp"

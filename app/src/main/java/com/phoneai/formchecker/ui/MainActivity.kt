@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) openCamera()
-        else Toast.makeText(this, "カメラの許可が必要です", Toast.LENGTH_SHORT).show()
+        else Toast.makeText(this, "Cần cấp quyền truy cập camera", Toast.LENGTH_SHORT).show()
     }
 
     private val cameraResultLauncher = registerForActivityResult(
@@ -67,14 +67,14 @@ class MainActivity : AppCompatActivity() {
         val status = when (engine) {
             AnalyzerEngine.LOCAL_GEMMA -> {
                 if (ModelManager.isModelReady(this)) {
-                    "✅ オンデバイスAI (Gemma)\nモデル: 読込済み (${ModelManager.modelSizeMb(this)} MB) ・ オフライン動作"
+                    "✅ AI trên thiết bị (Gemma)\nModel: đã tải (${ModelManager.modelSizeMb(this)} MB) · Hoạt động offline"
                 } else {
-                    "⚠ オンデバイスAI (Gemma)\nモデル未読込。「AIモデルを管理」から .task ファイルを取り込んでください。"
+                    "⚠ AI trên thiết bị (Gemma)\nChưa có model. Vào \"Quản lý model AI\" để tải file .task."
                 }
             }
             AnalyzerEngine.CLAUDE_CLOUD -> {
-                if (ModelManager.hasCloudKey()) "☁ クラウドAI (Claude) ・ オンライン"
-                else "⚠ クラウドAI (Claude)\nAPIキー未設定 (ビルド時に CLAUDE_API_KEY が必要)"
+                if (ModelManager.hasCloudKey()) "☁ AI đám mây (Claude) · Trực tuyến"
+                else "⚠ AI đám mây (Claude)\nChưa có API key (cần CLAUDE_API_KEY khi build)"
             }
         }
         binding.tvEngineStatus.text = status
@@ -84,16 +84,16 @@ class MainActivity : AppCompatActivity() {
         val engine = ModelManager.getEngine(this)
         if (engine == AnalyzerEngine.LOCAL_GEMMA && !ModelManager.isModelReady(this)) {
             AlertDialog.Builder(this)
-                .setTitle("モデルが必要です")
-                .setMessage("オンデバイスAIを使うには Gemma 3n のモデルファイル(.task)が必要です。")
-                .setPositiveButton("⬇ ダウンロード") { _, _ -> openDownloadScreen() }
-                .setNeutralButton("📂 ファイルを選択") { _, _ -> pickModel() }
-                .setNegativeButton("キャンセル", null)
+                .setTitle("Cần model AI")
+                .setMessage("Để dùng AI trên thiết bị, cần có file model Gemma 3n (.task).")
+                .setPositiveButton("⬇ Tải xuống") { _, _ -> openDownloadScreen() }
+                .setNeutralButton("📂 Chọn file") { _, _ -> pickModel() }
+                .setNegativeButton("Hủy", null)
                 .show()
             return
         }
         if (engine == AnalyzerEngine.CLAUDE_CLOUD && !ModelManager.hasCloudKey()) {
-            Toast.makeText(this, "APIキーが未設定です。ローカルエンジンに切替えるか、APIキー付きでビルドしてください。", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Chưa có API key. Hãy chuyển sang engine local hoặc build kèm CLAUDE_API_KEY.", Toast.LENGTH_LONG).show()
             return
         }
         checkCameraPermission()
@@ -102,24 +102,24 @@ class MainActivity : AppCompatActivity() {
     private fun onManageModelClicked() {
         val ready = ModelManager.isModelReady(this)
         val msg = if (ready)
-            "モデル読込済み (${ModelManager.modelSizeMb(this)} MB)。\n差し替える場合はダウンロードまたはファイル選択してください。"
+            "Đã có model (${ModelManager.modelSizeMb(this)} MB).\nĐể thay thế, hãy tải xuống hoặc chọn file mới."
         else
-            "Gemma 3n の .task モデルが必要です。\nURLを指定してアプリ内でダウンロードするか、端末内のファイルを取り込んでください。"
+            "Cần model Gemma 3n (.task).\nNhập URL để tải trong app hoặc chọn file từ thiết bị."
 
         val builder = AlertDialog.Builder(this)
-            .setTitle("AIモデルの管理")
+            .setTitle("Quản lý model AI")
             .setMessage(msg)
-            .setPositiveButton("⬇ ダウンロード") { _, _ -> openDownloadScreen() }
-            .setNeutralButton("📂 ファイルを選択") { _, _ -> pickModel() }
+            .setPositiveButton("⬇ Tải xuống") { _, _ -> openDownloadScreen() }
+            .setNeutralButton("📂 Chọn file") { _, _ -> pickModel() }
 
         if (ready) {
-            builder.setNegativeButton("🗑 削除") { _, _ ->
+            builder.setNegativeButton("🗑 Xóa") { _, _ ->
                 ModelManager.deleteModel(this)
                 refreshStatus()
-                Toast.makeText(this, "モデルを削除しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Đã xóa model", Toast.LENGTH_SHORT).show()
             }
         } else {
-            builder.setNegativeButton("閉じる", null)
+            builder.setNegativeButton("Đóng", null)
         }
 
         builder.show()
@@ -131,17 +131,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun onSwitchEngineClicked() {
         val current = ModelManager.getEngine(this)
-        val options = arrayOf("オンデバイスAI (Gemma) ・ オフライン", "クラウドAI (Claude) ・ オンライン")
+        val options = arrayOf("AI trên thiết bị (Gemma) · Offline", "AI đám mây (Claude) · Trực tuyến")
         val checked = if (current == AnalyzerEngine.LOCAL_GEMMA) 0 else 1
         AlertDialog.Builder(this)
-            .setTitle("解析エンジンを選択")
+            .setTitle("Chọn engine phân tích")
             .setSingleChoiceItems(options, checked) { dialog, which ->
                 val engine = if (which == 0) AnalyzerEngine.LOCAL_GEMMA else AnalyzerEngine.CLAUDE_CLOUD
                 ModelManager.setEngine(this, engine)
                 refreshStatus()
                 dialog.dismiss()
             }
-            .setNegativeButton("キャンセル", null)
+            .setNegativeButton("Hủy", null)
             .show()
     }
 
@@ -154,19 +154,19 @@ class MainActivity : AppCompatActivity() {
         binding.layoutProgress.visibility = View.VISIBLE
         binding.btnCapture.isEnabled = false
         binding.btnModel.isEnabled = false
-        binding.tvProgress.text = "モデルを取り込み中..."
+        binding.tvProgress.text = "Đang import model..."
 
         lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) {
                     ModelManager.importModel(this@MainActivity, uri) { copied ->
                         val mb = copied / (1024 * 1024)
-                        runOnUiThread { binding.tvProgress.text = "取り込み中... $mb MB" }
+                        runOnUiThread { binding.tvProgress.text = "Đang nhập... $mb MB" }
                     }
                 }
-                Toast.makeText(this@MainActivity, "モデルの取り込みが完了しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "Import model hoàn tất", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "取り込み失敗: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, "Import thất bại: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 binding.layoutProgress.visibility = View.GONE
                 binding.btnCapture.isEnabled = true
