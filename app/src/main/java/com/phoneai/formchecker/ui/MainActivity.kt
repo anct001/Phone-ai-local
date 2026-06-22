@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -18,6 +19,10 @@ import com.phoneai.formchecker.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,12 +52,17 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.OpenDocument()
     ) { uri -> uri?.let { importModel(it) } }
 
+    private val galleryLauncher = registerForActivityResult(
+        PickVisualMedia()
+    ) { uri -> uri?.let { loadGalleryImage(it) } }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.btnCapture.setOnClickListener { onCaptureClicked() }
+        binding.btnGallery.setOnClickListener { onGalleryClicked() }
         binding.btnModel.setOnClickListener { onManageModelClicked() }
         binding.btnSwitchEngine.setOnClickListener { onSwitchEngineClicked() }
     }
@@ -97,6 +107,55 @@ class MainActivity : AppCompatActivity() {
             return
         }
         checkCameraPermission()
+    }
+
+    private fun onGalleryClicked() {
+        val engine = ModelManager.getEngine(this)
+        if (engine == AnalyzerEngine.LOCAL_GEMMA && !ModelManager.isModelReady(this)) {
+            AlertDialog.Builder(this)
+                .setTitle("Cần model AI")
+                .setMessage("Để dùng AI trên thiết bị, cần có file model Gemma 3n (.task).")
+                .setPositiveButton("⬇ Tải xuống") { _, _ -> openDownloadScreen() }
+                .setNeutralButton("📂 Chọn file") { _, _ -> pickModel() }
+                .setNegativeButton("Hủy", null)
+                .show()
+            return
+        }
+        if (engine == AnalyzerEngine.CLAUDE_CLOUD && !ModelManager.hasCloudKey()) {
+            Toast.makeText(this, "Chưa có API key. Hãy chuyển sang engine local.", Toast.LENGTH_LONG).show()
+            return
+        }
+        galleryLauncher.launch(PickVisualMedia.ImageOnly)
+    }
+
+    private fun loadGalleryImage(uri: Uri) {
+        binding.layoutProgress.visibility = View.VISIBLE
+        binding.btnCapture.isEnabled = false
+        binding.btnGallery.isEnabled = false
+        binding.tvProgress.text = "Đang tải ảnh..."
+
+        lifecycleScope.launch {
+            try {
+                val destFile = withContext(Dispatchers.IO) {
+                    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                    val dest = File(externalCacheDir ?: cacheDir, "form_$timestamp.jpg")
+                    contentResolver.openInputStream(uri).use { input ->
+                        requireNotNull(input) { "Không mở được ảnh" }
+                        dest.outputStream().use { input.copyTo(it) }
+                    }
+                    dest
+                }
+                startActivity(Intent(this@MainActivity, ResultActivity::class.java).apply {
+                    putExtra(ResultActivity.EXTRA_IMAGE_PATH, destFile.absolutePath)
+                })
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "Không tải được ảnh: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                binding.layoutProgress.visibility = View.GONE
+                binding.btnCapture.isEnabled = true
+                binding.btnGallery.isEnabled = true
+            }
+        }
     }
 
     private fun onManageModelClicked() {

@@ -72,8 +72,17 @@
         android:layout_height="60dp"
         android:text="📷  Chụp ảnh biểu mẫu"
         android:textSize="17sp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="8dp"
         style="@style/Widget.MaterialComponents.Button" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:text="🖼  Chọn ảnh từ thư viện"
+        android:textSize="16sp"
+        android:layout_marginBottom="12dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_model"
