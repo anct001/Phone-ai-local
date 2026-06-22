@@ -23,6 +23,23 @@ android {
         viewBinding = true
     }
 
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/INDEX.LIST",
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md"
+            )
+        }
+        jniLibs {
+            pickFirsts += setOf(
+                "**/libc++_shared.so",
+                "**/libimage_processing_util_jni.so"
+            )
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
