@@ -11,18 +11,18 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 data class FieldResult(
-    val fieldName: String,
-    val value: String,
-    val status: String,   // "OK", "ERROR", "WARNING", "MISSING"
-    val message: String
+    val fieldName: String = "",
+    val value: String = "",
+    val status: String = "",   // "OK", "ERROR", "WARNING", "MISSING"
+    val message: String = ""
 )
 
 data class FormAnalysisResult(
-    val formType: String,
-    val formTitle: String,
-    val overallStatus: String,   // "PASS", "FAIL", "WARNING"
-    val summary: String,
-    val fields: List<FieldResult>
+    val formType: String = "",
+    val formTitle: String = "",
+    val overallStatus: String = "",   // "PASS", "FAIL", "WARNING"
+    val summary: String = "",
+    val fields: List<FieldResult> = emptyList()
 )
 
 class ClaudeApiService {
@@ -130,7 +130,24 @@ formTypeは以下から選択: LOT_MANAGEMENT, DAILY_REPORT, PRODUCTION_SUMMARY,
 
         // Extract JSON from the response (Claude sometimes wraps in markdown)
         val jsonText = extractJson(text)
-        return gson.fromJson(jsonText, FormAnalysisResult::class.java)
+        val parsed = gson.fromJson(jsonText, FormAnalysisResult::class.java)
+            ?: throw RuntimeException("Failed to parse analysis result")
+
+        // Sanitize: Gson can inject nulls into non-null Kotlin fields
+        return FormAnalysisResult(
+            formType = parsed.formType ?: "",
+            formTitle = parsed.formTitle ?: "",
+            overallStatus = (parsed.overallStatus ?: "").ifBlank { "WARNING" },
+            summary = parsed.summary ?: "",
+            fields = (parsed.fields ?: emptyList()).map { f ->
+                FieldResult(
+                    fieldName = f.fieldName ?: "",
+                    value = f.value ?: "",
+                    status = (f.status ?: "").ifBlank { "WARNING" },
+                    message = f.message ?: ""
+                )
+            }
+        )
     }
 
     private fun extractJson(text: String): String {
