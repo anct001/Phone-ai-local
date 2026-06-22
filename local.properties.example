@@ -1,0 +1,7 @@
+## Copy this file to local.properties and fill in your values
+## ファイルをlocal.propertiesにコピーして値を入力してください
+
+sdk.dir=/path/to/Android/sdk
+
+## Get your API key from https://console.anthropic.com
+CLAUDE_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx
