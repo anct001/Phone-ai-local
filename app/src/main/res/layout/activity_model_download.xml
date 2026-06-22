@@ -41,7 +41,7 @@
                     android:textSize="13sp"
                     android:lineSpacingExtra="3dp"
                     android:textColor="@color/text_secondary"
-                    android:text="Cách lấy link tải model:\n\n1. Vào trang Gemma 3n trên Hugging Face\n   (huggingface.co/google)\n2. Đăng nhập và chấp nhận điều khoản license\n3. Copy link tải file định dạng MediaPipe (.task)\n4. Dán URL vào ô bên dưới rồi nhấn \"Bắt đầu tải xuống\"\n\nModel khuyến nghị: gemma-3n-E4B-it-int4.task (~1,5 GB)" />
+                    android:text="Cách lấy link tải model:\n\n1. Vào trang Gemma 3n trên Hugging Face\n   (huggingface.co/google)\n2. Đăng nhập và chấp nhận điều khoản license\n3. Copy link tải file định dạng MediaPipe (.task)\n4. Dán URL vào ô bên dưới rồi nhấn &quot;Bắt đầu tải xuống&quot;\n\nModel khuyến nghị: gemma-3n-E4B-it-int4.task (~1,5 GB)" />
 
             </LinearLayout>
 
