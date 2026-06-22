@@ -47,8 +47,12 @@ jobs:
             Tải file `app-debug.apk` bên dưới và cài lên thiết bị Android
             (bật "Cài đặt từ nguồn không xác định").
 
-            Lưu ý: cần cấu hình CLAUDE_API_KEY khi build để dùng tính năng AI.
-            Bản này build không kèm API key nên màn hình chính sẽ hiện cảnh báo.
+            Hai chế độ AI:
+            - 🧠 On-device (Gemma 3n) — offline, không cần API key.
+              Cần import file model .task trong app (nút "AIモデルを管理").
+            - ☁ Cloud (Claude) — chính xác hơn, cần build kèm CLAUDE_API_KEY.
+
+            Bản build này không kèm API key; mặc định dùng engine on-device.
           files: app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

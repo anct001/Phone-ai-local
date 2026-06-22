@@ -2,6 +2,12 @@
 
 Androidアプリで製造業の帳票を撮影し、AIで記入内容を自動検証します。
 
+**2つの解析エンジンに対応:**
+- 🧠 **オンデバイスAI (Gemma 3n)** — 完全オフライン・APIキー不要（既定）
+- ☁ **クラウドAI (Claude)** — 高精度（手書きに強い・要APIキー）
+
+エンジンはアプリ内「エンジン切替」でいつでも変更できます。
+
 ## 対応帳票
 
 | 帳票種類 | 検証内容 |
@@ -10,7 +16,28 @@ Androidアプリで製造業の帳票を撮影し、AIで記入内容を自動�
 | ライン作業日報 | 時間帯別生産数、合計値、担当者署名 |
 | その他製造帳票 | 必須フィールド、数値整合性 |
 
-## セットアップ
+## オンデバイスAI (Gemma) のセットアップ
+
+オンデバイスエンジンはモデルファイルが大きい(~1.5–3GB)ためAPKには同梱しません。
+ユーザーが端末にモデルを取り込みます。
+
+1. Gemma 3n の画像対応モデル(`.task` 形式)を入手
+   （[Google AI Edge / LiteRT のモデルページ](https://ai.google.dev/edge/litert) や
+   Hugging Face の対応モデルから。ライセンス同意が必要な場合があります）
+2. 端末本体ストレージに保存
+3. アプリ →「🧠 AIモデルを管理」→「取り込む」→ ファイルを選択
+4. 取り込み完了後、撮影するとオフラインで解析されます
+
+> 推奨スペック: RAM 6–8GB 以上。手書きが多い帳票は精度が下がるため、
+> 重要な検証はクラウドAI(Claude)併用を推奨します。
+
+開発時に adb で直接モデルを置く場合:
+```bash
+adb push gemma-3n.task /sdcard/Download/
+# その後アプリの「取り込む」で /Download から選択
+```
+
+## クラウドAI (Claude) のセットアップ
 
 ### 1. APIキーの設定
 
@@ -55,6 +82,22 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ## 技術スタック
 
 - Kotlin + CameraX
-- Claude claude-sonnet-4-6 (Vision API)
+- **MediaPipe LLM Inference (Gemma 3n / on-device vision)**
+- Claude claude-sonnet-4-6 (Vision API / cloud)
 - Material Design 3
-- OkHttp + Coroutines
+- OkHttp + Gson + Coroutines
+
+## アーキテクチャ
+
+```
+CameraActivity → 画像
+                  ↓
+        ModelManager.createAnalyzer()   ← エンジン選択 (SharedPreferences)
+              ┌────────┴─────────┐
+   LocalGemmaAnalyzer        ClaudeApiService
+   (MediaPipe, offline)      (Anthropic API)
+              └────────┬─────────┘
+            FormAnalyzer interface
+                  ↓
+        FormAnalysisResult → ResultActivity
+```

@@ -8,9 +8,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.phoneai.formchecker.api.ClaudeApiService
-import com.phoneai.formchecker.api.FieldResult
-import com.phoneai.formchecker.api.FormAnalysisResult
+import com.phoneai.formchecker.analyzer.AnalyzerEngine
+import com.phoneai.formchecker.analyzer.FieldResult
+import com.phoneai.formchecker.analyzer.FormAnalysisResult
+import com.phoneai.formchecker.analyzer.ModelManager
 import com.phoneai.formchecker.databinding.ActivityResultBinding
 import com.phoneai.formchecker.databinding.ItemFieldResultBinding
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,6 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityResultBinding
-    private val apiService = ClaudeApiService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,13 +57,22 @@ class ResultActivity : AppCompatActivity() {
     private fun analyzeImage(file: File) {
         binding.progressBar.visibility = View.VISIBLE
         binding.layoutResults.visibility = View.GONE
-        binding.tvStatus.text = "AIが帳票を解析中..."
+        val engineLabel = when (ModelManager.getEngine(this)) {
+            AnalyzerEngine.LOCAL_GEMMA -> "オンデバイスAI (Gemma)"
+            AnalyzerEngine.CLAUDE_CLOUD -> "クラウドAI (Claude)"
+        }
+        binding.tvStatus.text = "$engineLabel が帳票を解析中..."
         binding.btnRetry.isEnabled = false
 
         lifecycleScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
-                    apiService.analyzeForm(file)
+                    val analyzer = ModelManager.createAnalyzer(this@ResultActivity)
+                    try {
+                        analyzer.analyze(file)
+                    } finally {
+                        analyzer.close()
+                    }
                 }
                 displayResults(result)
             } catch (e: Exception) {

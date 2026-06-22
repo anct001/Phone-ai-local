@@ -8,64 +8,97 @@
     android:background="@color/bg_light">
 
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="84dp"
+        android:layout_height="84dp"
         android:src="@drawable/ic_form_check"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="12dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
-        android:textSize="26sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/primary"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="4dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="帳票を撮影してAIで検証します"
-        android:textSize="14sp"
+        android:text="帳票を撮影してオンデバイスAIで検証します"
+        android:textSize="13sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginBottom="40dp" />
+        android:layout_marginBottom="24dp" />
 
+    <!-- Engine / model status -->
     <TextView
-        android:id="@+id/tv_api_warning"
+        android:id="@+id/tv_engine_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="⚠ APIキーが未設定です。local.propertiesに CLAUDE_API_KEY を設定してください。"
-        android:textColor="#C62828"
-        android:background="#FFEBEE"
         android:padding="12dp"
         android:textSize="13sp"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone" />
+        android:background="#E3F2FD"
+        android:textColor="#0D47A1"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Model import progress -->
+    <LinearLayout
+        android:id="@+id/layout_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tv_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="4dp" />
+
+        <ProgressBar
+            android:id="@+id/progress_import"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_capture"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="60dp"
         android:text="📷  帳票を撮影する"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"
+        android:textSize="17sp"
+        android:layout_marginBottom="12dp"
         style="@style/Widget.MaterialComponents.Button" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_history"
+        android:id="@+id/btn_model"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:text="📋  検証履歴"
-        android:textSize="16sp"
+        android:layout_height="50dp"
+        android:text="🧠  AIモデルを管理"
+        android:textSize="15sp"
+        android:layout_marginBottom="12dp"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_switch_engine"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="エンジン切替"
+        android:textSize="13sp"
+        style="@style/Widget.MaterialComponents.Button.TextButton" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="対応帳票: 加工指示書・ロット管理票 / ライン作業日報"
+        android:text="対応帳票: ロット管理票 / ライン作業日報"
         android:textSize="11sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="20dp"
         android:gravity="center" />
 
 </LinearLayout>

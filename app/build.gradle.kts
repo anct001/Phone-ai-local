@@ -54,4 +54,5 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.gson)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.mediapipe.tasks.genai)
 }
