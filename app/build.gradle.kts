@@ -55,4 +55,5 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.mediapipe.tasks.genai)
+    implementation(libs.mediapipe.tasks.vision)
 }
