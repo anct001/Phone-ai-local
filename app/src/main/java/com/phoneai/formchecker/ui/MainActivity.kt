@@ -85,8 +85,9 @@ class MainActivity : AppCompatActivity() {
         if (engine == AnalyzerEngine.LOCAL_GEMMA && !ModelManager.isModelReady(this)) {
             AlertDialog.Builder(this)
                 .setTitle("モデルが必要です")
-                .setMessage("オンデバイスAIを使うには Gemma 3n のモデルファイル(.task)を取り込む必要があります。今すぐ取り込みますか？")
-                .setPositiveButton("取り込む") { _, _ -> pickModel() }
+                .setMessage("オンデバイスAIを使うには Gemma 3n のモデルファイル(.task)が必要です。")
+                .setPositiveButton("⬇ ダウンロード") { _, _ -> openDownloadScreen() }
+                .setNeutralButton("📂 ファイルを選択") { _, _ -> pickModel() }
                 .setNegativeButton("キャンセル", null)
                 .show()
             return
@@ -101,23 +102,31 @@ class MainActivity : AppCompatActivity() {
     private fun onManageModelClicked() {
         val ready = ModelManager.isModelReady(this)
         val msg = if (ready)
-            "モデル読込済み (${ModelManager.modelSizeMb(this)} MB)。\n別のモデルに差し替える場合は「取り込む」を選んでください。"
+            "モデル読込済み (${ModelManager.modelSizeMb(this)} MB)。\n差し替える場合はダウンロードまたはファイル選択してください。"
         else
-            "Gemma 3n の .task モデルファイルを端末にダウンロードしてから「取り込む」を選んでください。\n（推奨: gemma-3n の画像対応 .task モデル）"
+            "Gemma 3n の .task モデルが必要です。\nURLを指定してアプリ内でダウンロードするか、端末内のファイルを取り込んでください。"
 
         val builder = AlertDialog.Builder(this)
             .setTitle("AIモデルの管理")
             .setMessage(msg)
-            .setPositiveButton("取り込む") { _, _ -> pickModel() }
-            .setNegativeButton("閉じる", null)
+            .setPositiveButton("⬇ ダウンロード") { _, _ -> openDownloadScreen() }
+            .setNeutralButton("📂 ファイルを選択") { _, _ -> pickModel() }
+
         if (ready) {
-            builder.setNeutralButton("削除") { _, _ ->
+            builder.setNegativeButton("🗑 削除") { _, _ ->
                 ModelManager.deleteModel(this)
                 refreshStatus()
                 Toast.makeText(this, "モデルを削除しました", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            builder.setNegativeButton("閉じる", null)
         }
+
         builder.show()
+    }
+
+    private fun openDownloadScreen() {
+        startActivity(Intent(this, ModelDownloadActivity::class.java))
     }
 
     private fun onSwitchEngineClicked() {

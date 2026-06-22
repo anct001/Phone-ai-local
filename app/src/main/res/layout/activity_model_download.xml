@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_light"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Info card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🧠 Gemma 3n モデルをダウンロード"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="3dp"
+                    android:textColor="@color/text_secondary"
+                    android:text="モデルファイルのURLを取得する手順:\n\n1. Hugging Face でGemma 3nのモデルページを開く\n   (huggingface.co/google)\n2. アカウント登録・ログインしてライセンスに同意\n3. MediaPipe (.task) 形式ファイルのダウンロードURLをコピー\n4. 下の欄に貼り付けて「ダウンロード開始」をタップ\n\n推奨モデル: gemma-3n-E4B-it-int4.task (~1.5 GB)" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Storage info -->
+        <TextView
+            android:id="@+id/tv_storage_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="利用可能ストレージ: 計算中..."
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="6dp" />
+
+        <!-- WiFi warning -->
+        <TextView
+            android:id="@+id/tv_wifi_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚠ Wi-Fi未接続。モバイルデータでのダウンロードは大量通信量を消費します。"
+            android:textSize="12sp"
+            android:textColor="@color/status_warning"
+            android:visibility="gone"
+            android:layout_marginBottom="6dp" />
+
+        <!-- URL input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="ダウンロードURL (https://...)"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_download_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri|textMultiLine"
+                android:minLines="2"
+                android:gravity="top|start" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Progress bar -->
+        <ProgressBar
+            android:id="@+id/progress_download"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:max="100"
+            android:visibility="gone"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Status text -->
+        <TextView
+            android:id="@+id/tv_download_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/text_primary"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Download button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_download"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="⬇  ダウンロード開始"
+            android:textSize="15sp"
+            android:layout_marginBottom="12dp"
+            style="@style/Widget.MaterialComponents.Button" />
+
+        <!-- Cancel button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancel_download"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="キャンセル"
+            android:textSize="15sp"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+    </LinearLayout>
+
+</ScrollView>
