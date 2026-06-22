@@ -14,10 +14,8 @@ import com.phoneai.formchecker.databinding.ActivityModelDownloadBinding
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.coroutineContext
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -159,7 +157,6 @@ class ModelDownloadActivity : AppCompatActivity() {
             dest.outputStream().use { output ->
                 val buf = ByteArray(1 shl 20) // 1 MB chunks
                 while (true) {
-                    coroutineContext.ensureActive()
                     val n = input.read(buf)
                     if (n < 0) break
                     output.write(buf, 0, n)

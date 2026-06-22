@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -125,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Chưa có API key. Hãy chuyển sang engine local.", Toast.LENGTH_LONG).show()
             return
         }
-        galleryLauncher.launch(PickVisualMedia.ImageOnly)
+        galleryLauncher.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
     }
 
     private fun loadGalleryImage(uri: Uri) {
